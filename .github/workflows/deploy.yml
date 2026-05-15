@@ -1,4 +1,4 @@
-name: Deploy AWS Managed Grafana
+name: Deploy Dashboards
 
 on:
   push:
@@ -22,22 +22,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Deploy IAM Stack
-        run: |
-          aws cloudformation deploy \
-          --template-file templates/01-iam.yaml \
-          --stack-name grafana-iam \
-          --capabilities CAPABILITY_NAMED_IAM
-
-      - name: Deploy Grafana Workspace
-        run: |
-          aws cloudformation deploy \
-          --template-file templates/02-grafana-workspace.yaml \
-          --stack-name grafana-workspace \
-          --parameter-overrides \
-          GrafanaWorkspaceRoleArn=arn:aws:iam::848518356380:role/grafana-workspace-role
+          aws-region: ap-south-1
 
       - name: Deploy CloudWatch Dashboard
         run: |
