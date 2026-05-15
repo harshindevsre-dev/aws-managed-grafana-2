@@ -1,0 +1,51 @@
+name: Deploy AWS Managed Grafana
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Deploy IAM Stack
+        run: |
+          aws cloudformation deploy \
+          --template-file templates/01-iam.yaml \
+          --stack-name grafana-iam \
+          --capabilities CAPABILITY_NAMED_IAM
+
+      - name: Deploy Grafana Workspace
+        run: |
+          aws cloudformation deploy \
+          --template-file templates/02-grafana-workspace.yaml \
+          --stack-name grafana-workspace \
+          --parameter-overrides \
+          GrafanaWorkspaceRoleArn=arn:aws:iam::848518356380:role/grafana-workspace-role
+
+      - name: Deploy CloudWatch Dashboard
+        run: |
+          aws cloudwatch put-dashboard \
+          --dashboard-name EC2-Observability \
+          --dashboard-body file://dashboards/cloudwatch-dashboard.json
+
+      - name: Verify Dashboard
+        run: |
+          aws cloudwatch get-dashboard \
+          --dashboard-name EC2-Observability
