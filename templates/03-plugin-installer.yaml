@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  WorkspaceId:
+    Type: String
+
+  PluginInstallerLambdaRoleArn:
+    Type: String
+
+Resources:
+
+  PluginInstallerFunction:
+    Type: AWS::Lambda::Function
+
+    Properties:
+
+      FunctionName: grafana-plugin-installer
+
+      Runtime: python3.12
+
+      Handler: index.handler
+
+      Timeout: 300
+
+      Role: !Ref PluginInstallerLambdaRoleArn
+
+      Code:
+        S3Bucket: grafana-artifacts-123456789
+        S3Key: grafana-plugin-installer.zip
+
+  PluginInstallerCustomResource:
+    Type: Custom::GrafanaPluginInstaller
+
+    Properties:
+
+      ServiceToken: !GetAtt PluginInstallerFunction.Arn
+
+      WorkspaceId: !Ref WorkspaceId

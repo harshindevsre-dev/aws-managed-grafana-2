@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  GrafanaWorkspaceRoleArn:
+    Type: String
+
+Resources:
+
+  GrafanaWorkspace:
+    Type: AWS::Grafana::Workspace
+
+    Properties:
+
+      Name: aws-managed-grafana
+
+      AccountAccessType: CURRENT_ACCOUNT
+
+      AuthenticationProviders:
+        - AWS_SSO
+
+      PermissionType: SERVICE_MANAGED
+
+      RoleArn: !Ref GrafanaWorkspaceRoleArn
+
+      DataSources:
+        - CLOUDWATCH
+
+Outputs:
+
+  WorkspaceId:
+    Value: !Ref GrafanaWorkspace
